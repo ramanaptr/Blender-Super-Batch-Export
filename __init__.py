@@ -5,7 +5,7 @@ import os
 
 bl_info = {
     "name": "Super Batch Export",
-    "author": "MrTriPie",
+    "author": "MrTriPie | Fork by ramanaptr",
     "version": (2, 1, 1),
     "blender": (3, 3, 0),
     "category": "Import-Export",
@@ -101,33 +101,36 @@ def draw_settings(self, context):
     col = self.layout.column()
 
     col.label(text=settings.file_format + " Settings:")
-    if settings.file_format == 'DAE':
-        col.prop(settings, 'dae_preset_enum')
-        self.layout.prop(settings, 'apply_mods')
-    elif settings.file_format == 'ABC':
-        col.prop(settings, 'abc_preset_enum')
-        col.prop(settings, 'frame_start')
-        col.prop(settings, 'frame_end')
-    elif settings.file_format == 'USD':
-        col.prop(settings, 'usd_format')
-        col.prop(settings, 'usd_preset_enum')
-    elif settings.file_format == 'OBJ':
+    # if settings.file_format == 'DAE':
+    #     col.prop(settings, 'dae_preset_enum')
+    #     self.layout.prop(settings, 'apply_mods')
+    # elif settings.file_format == 'ABC':
+    #     col.prop(settings, 'abc_preset_enum')
+    #     col.prop(settings, 'frame_start')
+    #     col.prop(settings, 'frame_end')
+    # elif settings.file_format == 'USD':
+    #     col.prop(settings, 'usd_format')
+    #     col.prop(settings, 'usd_preset_enum')
+    if settings.file_format == 'OBJ':
         col.prop(settings, 'obj_preset_enum')
         self.layout.prop(settings, 'apply_mods')
-    elif settings.file_format == 'PLY':
-        col.prop(settings, 'ply_ascii')
-        self.layout.prop(settings, 'apply_mods')
-    elif settings.file_format == 'STL':
-        col.prop(settings, 'stl_ascii')
-        self.layout.prop(settings, 'apply_mods')
+    # elif settings.file_format == 'PLY':
+    #     col.prop(settings, 'ply_ascii')
+    #     self.layout.prop(settings, 'apply_mods')
+    # elif settings.file_format == 'STL':
+    #     col.prop(settings, 'stl_ascii')
+    #     self.layout.prop(settings, 'apply_mods')
     elif settings.file_format == 'FBX':
         col.prop(settings, 'fbx_preset_enum')
         self.layout.prop(settings, 'apply_mods')
     elif settings.file_format == 'glTF':
         col.prop(settings, 'gltf_preset_enum')
         self.layout.prop(settings, 'apply_mods')
-    elif settings.file_format == 'X3D':
-        col.prop(settings, 'x3d_preset_enum')
+    # elif settings.file_format == 'X3D':
+    #     col.prop(settings, 'x3d_preset_enum')
+    #     self.layout.prop(settings, 'apply_mods')
+    elif settings.file_format == 'BLEND':
+        col.prop(settings, 'blend_preset_enum')
         self.layout.prop(settings, 'apply_mods')
 
     self.layout.use_property_split = False
@@ -407,6 +410,14 @@ class EXPORT_MESH_OT_batch(Operator):
             options["use_mesh_modifiers"] = settings.apply_mods
             bpy.ops.export_scene.x3d(**options)
 
+        elif settings.file_format == "BLEND":
+            options = load_operator_preset(
+                'wm.save_as_mainfile', settings.blend_preset)
+            options["filepath"] = fp+".blend"
+            options["use_selection"] = True
+            options["apply_modifiers"] = settings.apply_mods
+            bpy.ops.wm.save_as_mainfile(**options)
+
         # Reset the transform to what it was before
         i = 0
         for obj in context.selected_objects:
@@ -441,17 +452,18 @@ class BatchExportSettings(PropertyGroup):
         name="Format",
         description="Which file format to export to",
         items=[
-            ("DAE", "Collada (.dae)", "", 1),
-            ("ABC", "Alembic (.abc)", "", 9),
-            ("USD", "Universal Scene Description (.usd/.usdc/.usda)", "", 2),
-            ("SVG", "Grease Pencil as SVG (.svg)", "", 10),
-            ("PDF", "Grease Pencil as PDF (.pdf)", "", 11),
+            # ("DAE", "Collada (.dae)", "", 1),
+            # ("ABC", "Alembic (.abc)", "", 9),
+            # ("USD", "Universal Scene Description (.usd/.usdc/.usda)", "", 2),
+            # ("SVG", "Grease Pencil as SVG (.svg)", "", 10),
+            # ("PDF", "Grease Pencil as PDF (.pdf)", "", 11),
             ("OBJ", "Wavefront (.obj)", "", 7),
-            ("PLY", "Stanford (.ply)", "", 3),
-            ("STL", "STL (.stl)", "", 4),
+            # ("PLY", "Stanford (.ply)", "", 3),
+            # ("STL", "STL (.stl)", "", 4),
             ("FBX", "FBX (.fbx)", "", 5),
             ("glTF", "glTF (.glb/.gltf)", "", 6),
-            ("X3D", "X3D Extensible 3D (.x3d)", "", 8),
+            # ("X3D", "X3D Extensible 3D (.x3d)", "", 8),
+            ("BLEND", "BLEND File (.blend)", "", 12),
         ],
         default="glTF",
     )
@@ -558,6 +570,15 @@ class BatchExportSettings(PropertyGroup):
         set=lambda self, value: setattr(
             self, 'x3d_preset', preset_enum_items_refs['export_scene.x3d'][value][0]),
     )
+    blend_preset: StringProperty(default='NO_PRESET')
+    blend_preset_enum: EnumProperty(
+        name="Preset", options={'SKIP_SAVE'},
+        description="Use export settings from a preset.\n(Create in the export settings from the File > Export > Blend File (.blend))",
+        items=lambda self, context: get_operator_presets('export_scene.blend'),
+        get=lambda self: get_preset_index('export_scene.blend', self.blend_preset),
+        set=lambda self, value: setattr(
+            self, 'blend_preset', preset_enum_items_refs['export_scene.blend'][value][0]),
+    )
 
     apply_mods: BoolProperty(
         name="Apply Modifiers",
@@ -596,10 +617,10 @@ class BatchExportSettings(PropertyGroup):
     )
 
     # Transform:
-    set_location: BoolProperty(name="Set Location", default=True)
+    set_location: BoolProperty(name="Set Location", default=False)
     location: FloatVectorProperty(name="Location", default=(
         0.0, 0.0, 0.0), subtype="TRANSLATION")
-    set_rotation: BoolProperty(name="Set Rotation (XYZ Euler)", default=True)
+    set_rotation: BoolProperty(name="Set Rotation (XYZ Euler)", default=False)
     rotation: FloatVectorProperty(
         name="Rotation", default=(0.0, 0.0, 0.0), subtype="EULER")
     set_scale: BoolProperty(name="Set Scale", default=False)

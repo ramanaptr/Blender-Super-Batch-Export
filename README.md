@@ -1,11 +1,14 @@
+# NOTE! THIS IS CONTRIBUTOR AND FORKED PROJECT
+Forked by ```ramanaptr``` for individual use only! 
+
+If you want to re-fork, go a head, this is open source project by ```mrtripie``` and no guaratee error. Thanks!
+
 # Blender Super Batch Export
 Allows you to export multiple objects in a blend file to separate files in one click. Supports: **DAE, ABC, USD, SVG, PDF, OBJ, PLY, STL, FBX, glTF, X3D**
 
 It can be found in a few differnet places such as the **Top Bar** (by File, Edit, Render, Window, Help), the **3D Viewport Header** (next to View, Select, Add...), or the **3D Viewport Side Bar Export Tab**. You can set where to show it in the **Addon Location setting under Edit > Preferences > Add-ons > Batch Export > Preferences**.
 
 <img src="https://user-images.githubusercontent.com/65431647/147272597-7ed290c6-51b4-4afa-a8ee-ee4661330825.png" height="400"/> <img src="https://user-images.githubusercontent.com/65431647/147272883-0c8c10d7-062f-4737-8522-55a3c51c5c50.png" height="400"/>
-
-
 
 ## Instructions:
 Batch Export button: Press after everything is set up to export your meshes to seperate files.
